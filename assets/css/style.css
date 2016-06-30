@@ -1,0 +1,27 @@
+/* CSC309 Assignment 3 Summer 2016 */
+/* By Daniil Kouznetsov */
+
+body {
+  background-color: #000000;
+  margin: 0;
+  height: 100%;
+  position:relative;
+}
+
+canvas {
+  text-align: center;
+  margin: auto;
+  margin-top: 10px;
+  display: block;
+  border: solid 1px #6E6E6E;
+  border-top: none;
+}
+
+img {
+  display:hidden;
+}
+
+footer {
+  text-align: center;
+  color: white;
+}
