@@ -2,16 +2,20 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>Game Title</title>
+        <title>NY Times Web Server</title>
         <meta name="author" content="Daniil Kouznetsov" />
         <meta name="description" content="CSC309 Assignment 3 - Web Server"/>
         <link href="assets/css/style.css" type="text/css" rel="stylesheet"/>
-        <!-- viewport is defined to properly debug and to render webpage properly -->
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
       </head>
   <body>
-    <script src='assets/js/jquery-3.0.0.min.js'>    </script>
-
+    <script src='assets/js/jquery-3.0.0.min.js'></script>
+    <script src='assets/js/script.js'></script>
+    <form action='/articles/all/basic' method='get'>
+      <input id='button_basicArticle'
+        type='button' value='Get Basic Article Information'>
+    </form>
+    <main>
+    </main>
     <footer>
       <p>Created by Daniil Kouznetsov</p>
     </footer>

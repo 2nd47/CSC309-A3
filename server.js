@@ -16,11 +16,6 @@ function getArticles(content) {
   return articles;
 }
 
-// Group a set of article data by a given field (e.g. 'published_date')
-function groupBy(articles, field) {
-
-}
-
 // From a list of articles, retrieve basic information on all of them
 function getArticlesBasic(articles) {
   var articlesBasic = [];
@@ -117,6 +112,12 @@ function getArticleDetail(articles, index) {
     'des_facet'
   ];
 
+  // Check to ensure such an index exists
+  // For now default to the 0th article
+  if (index >= articles.length) {
+    index = 0;
+  }
+
   // Get all the relevant fields for the article and return it
   for (i in fields) {
     details[fields[i]] = articles[index][fields[i]];
@@ -125,7 +126,7 @@ function getArticleDetail(articles, index) {
   return details
 }
 
-// From a list of articles, retrieve them as a list of basic info and images
+// From a list of articles, get a list of articles with basic info and images
 function getThumbnailArticles(articles) {
   var articlesThumbed = [];
 
@@ -143,6 +144,11 @@ function getThumbnailArticles(articles) {
     for (j in article['multimedia']) {
       if (article['multimedia'][j]['format'] === 'Standard Thumbnail') {
         articlesThumbed[i]['multimedia'] = article['multimedia'][j];
+        break;
+      }
+      if (article['multimedia'][j]['format'] === 'thumbLarge') {
+        articlesThumbed[i]['multimedia'] = article['multimedia'][j];
+        break;
       }
     }
   }
@@ -155,27 +161,103 @@ function run_server() {
   var port = 8080;
 
   var fileContents = fs.readFileSync("nytimes.json");
-  var jsonContent = JSON.parse(fileContents);
+  var articleContent = JSON.parse(fileContents);
 
-  var articles = getArticles(jsonContent);
-  var articleBasics = getArticlesBasic(articles);
-  var authors = getAuthors(articles);
-  var shortURLsGrouped = getShortURLs(articles);
-  var tagCloud = getTags(articles);
-  var detailedArticle = getArticleDetail(articles, 0);
-  var thumbnailArticles = getThumbnailArticles(articles);
-  console.log(thumbnailArticles);
+  var articles = getArticles(articleContent);
 
   var server = http.createServer(function(req, res) {
-    if(req.url === '/' || req.url === '/index.html') {
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'text/plain');
-      res.end('Hello World\n');
+    var headers = req.headers;
+    var method = req.method;
+    var url = req.url;
+    var body = [];
+
+    // Report back any errors from invalid requests
+    req.on('error', function(err) {
+      console.error(err);
+      res.statusCode = 400;
+      res.end();
+    });
+
+    req.on('data', function(chunk) {
+      body.push(chunk);
+    });
+
+    req.on('end', function() {
+      //body = Buffer.concat().toString();
+    });
+
+    res.on('error', function(err) {
+      console.error(err);
+    });
+
+    // Check for any legal methods and URL paths
+    if (req.method.toLowerCase() === 'get') {
+      // Return home page
+      if (req.url.toLowerCase() === '/' ||
+          req.url.toLowerCase() === '/a3.html' ||
+          req.url.toLowerCase() === '/index.html') {
+          res.statusCode = 200;
+          res.setHeader('Content-Type', 'text/html');
+          body = fs.readFileSync('a3.html', 'utf-8');
+          res.write(body);
+      }
+      // Return all articles in basic form
+      else if (req.url.toLowerCase() === '/articles/all/basic') {
+        body = body.concat(JSON.stringify(getArticlesBasic(articles))).toString();
+
+      }
+      // Return all articles in thumbnail form
+      else if (req.url.toLowerCase() === '/articles/all/thumbnailed') {
+        body = body.concat(JSON.stringify(getThumbnailArticles(articles))).toString();
+      }
+      else if (req.url.toLowerCase() === '/articles/all/shortURL') {
+        body = body.concat(JSON.stringify(getArticlesBasic(articles))).toString();
+
+      }
+      // Return detailed information about one article
+      else if (req.url.toLowerCase().startsWith('/articles/select?index=')) {
+        var index = req.url.toLowerCase().replace('/articles/select?index=', '');
+        body = body.concat(JSON.stringify(getArticleDetail(articles, index))).toString();
+
+      }
+      // Return all authors for all articles
+      else if (req.url.toLowerCase() === '/authors') {
+        body = body.concat(JSON.stringify(getAuthors(articles))).toString();
+
+      }
+      // Return all tags used for all articles
+      else if (req.url.toLowerCase() === '/tags') {
+        body = body.concat(JSON.stringify(getTags(articles))).toString();
+
+      }
+      // There are no other endpoints for the GET method in our API
+      else {
+        res.statusCode = 404;
+        return res.end();
+      }
     }
+    // There are no other methods in our API
     else {
       res.statusCode = 404;
-      res.end();
+      return res.end();
     }
+
+    if (!res.headersSent) {
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+
+      var resBody = {
+        headers: headers,
+        method: method,
+        url: url,
+        body: body
+      };
+
+      res.write(JSON.stringify(resBody));
+    }
+
+
+    res.end();
   });
 
   server.listen(port, hostname, function() {
