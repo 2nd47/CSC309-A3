@@ -8,15 +8,6 @@ body {
   position:relative;
 }
 
-canvas {
-  text-align: center;
-  margin: auto;
-  margin-top: 10px;
-  display: block;
-  border: solid 1px #6E6E6E;
-  border-top: none;
-}
-
 img {
   display:hidden;
 }
@@ -24,4 +15,26 @@ img {
 footer {
   text-align: center;
   color: black;
+}
+
+.article-container {
+  width: 100%;
+  background-color: red;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
+  align-content: space-around;
+}
+
+.article {
+  width: 80%;
+  background-color: teal;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
+  align-content: space-around;
 }

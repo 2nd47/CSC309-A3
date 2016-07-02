@@ -6,12 +6,6 @@ var fs = require('fs');
 var url = require('url');
 var path = require('path');
 
-// By chakrit
-// From http://stackoverflow.com/questions/280634/endswith-in-javascript
-String.prototype.endsWith = function(suffix) {
-    return this.indexOf(suffix, this.length - suffix.length) !== -1;
-};
-
 // From NYTimes data, retrieve all articles
 function getArticles(content) {
   var articles = [];
@@ -117,7 +111,6 @@ function getArticleDetail(articles, index) {
     'abstract',
     'byline',
     'published_date',
-    'des_facet'
   ];
 
   // Check to ensure such an index exists
@@ -130,6 +123,9 @@ function getArticleDetail(articles, index) {
   for (i in fields) {
     details[fields[i]] = articles[index][fields[i]];
   }
+
+  // Change the 'des_facet' label to something more readable and get it
+  details['tags'] = articles[index]['des_facet'];
 
   return details
 }
@@ -151,11 +147,7 @@ function getThumbnailArticles(articles) {
     // Check and return a standard thumbnail for the given article
     for (j in article['multimedia']) {
       if (article['multimedia'][j]['format'] === 'Standard Thumbnail') {
-        articlesThumbed[i]['multimedia'] = article['multimedia'][j];
-        break;
-      }
-      if (article['multimedia'][j]['format'] === 'thumbLarge') {
-        articlesThumbed[i]['multimedia'] = article['multimedia'][j];
+        articlesThumbed[i]['thumbnail'] = article['multimedia'][j];
         break;
       }
     }
@@ -180,14 +172,10 @@ function getFile(localPath, res, mimeType) {
 	});
 }
 
-function run_server() {
+// The server will use a list of articles which have been provided by a file
+function run_server(articles) {
   var hostname = '127.0.0.1';
   var port = 8080;
-
-  var fileContents = fs.readFileSync("nytimes.json");
-  var articleContent = JSON.parse(fileContents);
-
-  var articles = getArticles(articleContent);
 
   var server = http.createServer(function(req, res) {
     var headers = req.headers;
@@ -228,6 +216,8 @@ function run_server() {
       console.error(err);
     });
 
+    console.log('Request at URL: ' + req.url);
+
     // Check for any legal methods and URL paths
     if (req.method.toLowerCase() === 'get') {
       // Return home page
@@ -251,24 +241,24 @@ function run_server() {
           });
       }
       // Return all articles in basic form
-      else if (req.url.toLowerCase() === '/articles/all/basic') {
+      else if (req.url.toLowerCase() === '/articles/basic') {
         body = body.concat(JSON.stringify(getArticlesBasic(articles))).toString();
         res.writeHeader(200, {'Content-Type' : 'application/json'});
         res.end(JSON.stringify(body));
       }
       // Return all articles in thumbnail form
-      else if (req.url.toLowerCase() === '/articles/all/thumbnailed') {
+      else if (req.url.toLowerCase() === '/articles/thumbnail') {
         body = body.concat(JSON.stringify(getThumbnailArticles(articles))).toString();
         res.writeHeader(200, {'Content-Type' : 'application/json'});
         res.end(JSON.stringify(body));
       }
-      else if (req.url.toLowerCase() === '/articles/all/shortURL') {
+      else if (req.url.toLowerCase() === '/articles/shorturl') {
         body = body.concat(JSON.stringify(getArticlesBasic(articles))).toString();
         res.writeHeader(200, {'Content-Type' : 'application/json'});
         res.end(JSON.stringify(body));
       }
       // Return detailed information about one article
-      else if (req.url.toLowerCase().startsWith('/articles/')) {
+      else if (req.url.toLowerCase().match(/\/articles\/[0-9]+/)) {
         var index = req.url.toLowerCase().replace('/articles/', '');
         body = body.concat(JSON.stringify(getArticleDetail(articles, index))).toString();
         res.writeHeader(200, {'Content-Type' : 'application/json'});
@@ -303,7 +293,11 @@ function run_server() {
 }
 
 function main() {
-  run_server();
+  // We only want to read in the file once to save on load times
+  var fileContents = fs.readFileSync("nytimes.json");
+  var articleContent = JSON.parse(fileContents);
+  var articles = getArticles(articleContent);
+  run_server(articles);
 }
 
 main();
