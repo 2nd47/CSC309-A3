@@ -3,6 +3,14 @@
 
 var http = require('http');
 var fs = require('fs');
+var url = require('url');
+var path = require('path');
+
+// By chakrit
+// From http://stackoverflow.com/questions/280634/endswith-in-javascript
+String.prototype.endsWith = function(suffix) {
+    return this.indexOf(suffix, this.length - suffix.length) !== -1;
+};
 
 // From NYTimes data, retrieve all articles
 function getArticles(content) {
@@ -156,6 +164,22 @@ function getThumbnailArticles(articles) {
   return articlesThumbed;
 }
 
+// By Garann Means
+// From Node.js for Front-End Developers (p. 9-10)
+function getFile(localPath, res, mimeType) {
+	fs.readFile(localPath, function(err, contents) {
+		if(!err) {
+			res.setHeader("Content-Length", contents.length);
+			res.setHeader("Content-Type", mimeType);
+			res.statusCode = 200;
+			res.end(contents);
+		} else {
+			res.writeHead(500);
+			res.end();
+		}
+	});
+}
+
 function run_server() {
   var hostname = '127.0.0.1';
   var port = 8080;
@@ -168,8 +192,22 @@ function run_server() {
   var server = http.createServer(function(req, res) {
     var headers = req.headers;
     var method = req.method;
-    var url = req.url;
+    var reqUrl = url.parse(req.url);
     var body = [];
+
+    var filename = req.url || "/a3.html";
+  	var ext = path.extname(filename);
+  	var localPath = __dirname;
+  	var validExtensions = {
+  		".html" : "text/html",
+  		".js": "application/javascript",
+  		".css": "text/css",
+  		".txt": "text/plain",
+  		".jpg": "image/jpeg",
+  		".gif": "image/gif",
+  		".png": "image/png"
+  	};
+  	var isValidExt = validExtensions[ext];
 
     // Report back any errors from invalid requests
     req.on('error', function(err) {
@@ -193,42 +231,60 @@ function run_server() {
     // Check for any legal methods and URL paths
     if (req.method.toLowerCase() === 'get') {
       // Return home page
-      if (req.url.toLowerCase() === '/' ||
-          req.url.toLowerCase() === '/a3.html' ||
-          req.url.toLowerCase() === '/index.html') {
-          res.statusCode = 200;
-          res.setHeader('Content-Type', 'text/html');
-          body = fs.readFileSync('a3.html', 'utf-8');
-          res.write(body);
+      if (req.url.toLowerCase() === '/') {
+        localPath += '/a3.html';
+        fs.exists(localPath, function(exists) {
+          if (exists) {
+            console.log("Serving file: " + localPath);
+            getFile(localPath, res, ext);
+          }
+        });
+      }
+      // Return any files that are needed to be loaded
+      else if (isValidExt) {
+          localPath += filename;
+          fs.exists(localPath, function(exists) {
+            if (exists) {
+              console.log("Serving file: " + localPath);
+              getFile(localPath, res, validExtensions[ext]);
+            }
+          });
       }
       // Return all articles in basic form
       else if (req.url.toLowerCase() === '/articles/all/basic') {
         body = body.concat(JSON.stringify(getArticlesBasic(articles))).toString();
-
+        res.writeHeader(200, {'Content-Type' : 'application/json'});
+        res.end(JSON.stringify(body));
       }
       // Return all articles in thumbnail form
       else if (req.url.toLowerCase() === '/articles/all/thumbnailed') {
         body = body.concat(JSON.stringify(getThumbnailArticles(articles))).toString();
+        res.writeHeader(200, {'Content-Type' : 'application/json'});
+        res.end(JSON.stringify(body));
       }
       else if (req.url.toLowerCase() === '/articles/all/shortURL') {
         body = body.concat(JSON.stringify(getArticlesBasic(articles))).toString();
-
+        res.writeHeader(200, {'Content-Type' : 'application/json'});
+        res.end(JSON.stringify(body));
       }
       // Return detailed information about one article
-      else if (req.url.toLowerCase().startsWith('/articles/select?index=')) {
-        var index = req.url.toLowerCase().replace('/articles/select?index=', '');
+      else if (req.url.toLowerCase().startsWith('/articles/')) {
+        var index = req.url.toLowerCase().replace('/articles/', '');
         body = body.concat(JSON.stringify(getArticleDetail(articles, index))).toString();
-
+        res.writeHeader(200, {'Content-Type' : 'application/json'});
+        res.end(JSON.stringify(body));
       }
       // Return all authors for all articles
       else if (req.url.toLowerCase() === '/authors') {
         body = body.concat(JSON.stringify(getAuthors(articles))).toString();
-
+        res.writeHeader(200, {'Content-Type' : 'application/json'});
+        res.end(JSON.stringify(body));
       }
       // Return all tags used for all articles
       else if (req.url.toLowerCase() === '/tags') {
         body = body.concat(JSON.stringify(getTags(articles))).toString();
-
+        res.writeHeader(200, {'Content-Type' : 'application/json'});
+        res.end(JSON.stringify(body));
       }
       // There are no other endpoints for the GET method in our API
       else {
@@ -241,26 +297,7 @@ function run_server() {
       res.statusCode = 404;
       return res.end();
     }
-
-    if (!res.headersSent) {
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'application/json');
-
-      var resBody = {
-        headers: headers,
-        method: method,
-        url: url,
-        body: body
-      };
-
-      res.write(JSON.stringify(resBody));
-    }
-
-
-    res.end();
-  });
-
-  server.listen(port, hostname, function() {
+  }).listen(port, hostname, function() {
       console.log(`Server running at http://${hostname}:${port}/`);
   });
 }

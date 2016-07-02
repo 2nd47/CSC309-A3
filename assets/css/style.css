@@ -2,7 +2,7 @@
 /* By Daniil Kouznetsov */
 
 body {
-  background-color: 'white';
+  background-color: teal;
   margin: 0;
   height: 100%;
   position:relative;
@@ -23,5 +23,5 @@ img {
 
 footer {
   text-align: center;
-  color: white;
+  color: black;
 }

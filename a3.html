@@ -5,16 +5,16 @@
         <title>NY Times Web Server</title>
         <meta name="author" content="Daniil Kouznetsov" />
         <meta name="description" content="CSC309 Assignment 3 - Web Server"/>
-        <link href="assets/css/style.css" type="text/css" rel="stylesheet"/>
+        <link href="assets/css/style.css" type="text/css" rel="stylesheet">
       </head>
   <body>
     <script src='assets/js/jquery-3.0.0.min.js'></script>
     <script src='assets/js/script.js'></script>
-    <form action='/articles/all/basic' method='get'>
+    <form url='/articles/all/basic' method='get'>
       <input id='button_basicArticle'
-        type='button' value='Get Basic Article Information'>
+        type='button' value='Get Basic Article Information' name='basic'>
     </form>
-    <main>
+    <main id='main'>
     </main>
     <footer>
       <p>Created by Daniil Kouznetsov</p>
