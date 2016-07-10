@@ -1,0 +1,15 @@
+I think there are a few things that make the webpage worthy of a mark higher
+than that awarded for minimally meeting specification.
+
+These include:
+
+- Sticky header: will stay in place to quickly access a different example
+- Footer page instructions link: instead of having the instructions statically
+  in the page I chose to also include them as a separate AJAX call which also
+  loads an HTML served by the server to display instructions
+- Detailed article input box: It is styled to match the header and works fluidly
+  with the rest of the website
+- Blur on hover for thumbnail articles: Adding a blur over thumbnails gives the
+  user a simple way to know that they are selecting the correct content
+- Article title pop-up on hover: Dynamically pops up titles as you hover over
+  articles in thumbnail view

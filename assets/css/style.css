@@ -2,39 +2,186 @@
 /* By Daniil Kouznetsov */
 
 body {
-  background-color: teal;
-  margin: 0;
-  height: 100%;
-  position:relative;
+    font-family: "Arial", sans-serif;
+    font-size: medium;
+    width: 100%;
+    margin: 0px;
+    color: #333;
+    background:#EEE;
 }
 
-img {
-  display:hidden;
+p {
+  font-weight: normal;
+}
+
+a {
+  color: #36D7B7;
+  text-decoration:none;
+}
+
+a:hover {
+  color: #000; transition: all 0.3s ease;
+}
+
+nav {
+    position:fixed;
+    top:0px;
+    font-size:large;
+    display: flex;
+    background:lightgray;
+    border-width: 0px 0px 4px 0px;
+    border-style:solid;
+    border-color:#CCC;
+    width:100%;
+}
+
+nav a {
+    opacity:.8;
+    width: 90%;
+    height: auto;
+    margin: 0.25em;
+    text-align:center;
+}
+
+main {
+  margin-top: 2em;
 }
 
 footer {
+  margin-top: 3em;
   text-align: center;
   color: black;
 }
 
-.article-container {
-  width: 100%;
-  background-color: red;
+.content-container {
+  width: 90%;
+  margin-top:3em;
+  margin-left: 5%;
+  margin-right: 5%;
   display: flex;
+  /* default flex direction of column*/
   flex-direction: column;
   flex-wrap: wrap;
   justify-content: space-around;
   align-items: center;
   align-content: space-around;
+  /* Negative margin for footer */
+  margin-bottom: -2em;
 }
 
-.article {
-  width: 80%;
-  background-color: teal;
-  display: flex;
+.flex-row {
   flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  align-items: center;
-  align-content: space-around;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.content {
+  width: auto;
+  border-width: 0px;
+  border-bottom: 5px;
+  border-style: solid;
+  border-color: teal;
+  display: block;
+  text-align: center;
+  padding-bottom: 1em;
+}
+
+.img-content {
+  transition: opacity 0.4s ease-in-out;
+  text-align: center;
+  /* This ensures we only have at most 4 items per row */
+  width: 25%;
+}
+
+.img-desc {
+  width: 25%;
+  display: hidden;
+  position: absolute;
+  opacity: 0;
+  transition: opacity 0.4s ease-in-out;
+  pointer-events: none;
+}
+
+.img-content:hover .img-desc {
+  pointer-events: all;
+  display: block;
+  opacity: 1;
+  background-color:rgba(0,0,0,0.5);
+  border-width: 0px;
+  border-bottom: 5px;
+  border-color: teal;
+  border-style: solid;
+}
+
+/*
+.img-desc {
+  display: block;
+  position: absolute;
+  width:25%;
+  height:25%;
+  top:0;
+  left:0;
+  z-index:2;
+  opacity:0;
+  transition: opacity 0.4s ease-in-out;
+}
+
+.img-content:hover .img-desc {
+  opacity:1;
+  width:560px;
+  height:310px height:auto;
+  padding:5px;
+  display:block;
+  background:rgba(255, 255, 255, 0.4)
+}
+*/
+
+.borderless {
+  border: 0px;
+  padding: 0px;
+}
+
+.marginless {
+  margin: 0;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+span .cloud {
+  display: inline;
+}
+
+.blur img {
+  transition: all 0.4s ease;
+}
+
+.blur img:hover {
+  -webkit-filter: blur(2px);
+  filter: blur(2px);
+}
+
+/* Input box styling courtesy
+ * http://callmenick.com/post/various-css-input-text-styles
+ */
+
+input[type="text"] {
+  display: inline;
+  margin: 0;
+  width: 20px;
+  font-size: medium;
+  box-shadow: none;
+  text-align: center;
+}
+input[type="text"]:focus {
+  outline: none;
+}
+
+input[type="text"].style-4  {
+  border: none;
+  border-bottom: solid 2px #c9c9c9;
+  transition: border 0.3s;
 }

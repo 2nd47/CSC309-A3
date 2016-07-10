@@ -33,7 +33,7 @@
       "multimedia": [
         {
           "url": "https:\/\/static01.nyt.com\/images\/2016\/06\/21\/business\/00DB-BIOMETRICS\/00DB-BIOMETRICS-thumbStandard-v2.jpg",
-          "format": "Standard Thumbnail",
+          "format": "thumbLarge",
           "height": 75,
           "width": 75,
           "type": "image",
